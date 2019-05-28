@@ -1,0 +1,4 @@
+name = "EqUtils"
+uuid = "431123fa-8149-11e9-2d07-393b81832f28"
+authors = ["Pawan Bharadwaj <bharadwaj.pawan@gmail.com>"]
+version = "0.1.0"
