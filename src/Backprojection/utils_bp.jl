@@ -10,10 +10,10 @@ Right now, this has been customised for a particular file location. Since loadin
 Returns center, θ, ϕ, PREM travel times, and network IDs for all the receivers. </br>
 Note: θ, ϕ, and PREM travel times are with respect to the center
 """
-function obspy_data(earthquake)
-    eq_dir= readdir("Bp/utilities");
+function obspy_data(earthquake, dir_path, load_path)
+    eq_dir= readdir(dir_path);
     if earthquake*".h5" ∈ eq_dir
-        f= h5open("Bp/utilities/"*earthquake*".h5")
+        f= h5open(dir_path*"/"*earthquake*".h5")
         cntr= read(f, "center");
         θ= read(f, "theta")
         ϕ= read(f, "phi")
@@ -22,14 +22,14 @@ function obspy_data(earthquake)
         network= string.(network)
                 
         close(f)
-        @info("Loading the grid data for "*earthquake*" from the loaded dataset in Bp/utilities/ directory.")
+        @info("Loading the grid data for "*earthquake*" from the loaded dataset in the saved directory.")
         return cntr, θ, ϕ, travel_tines, network
     
     else
-        @info("Data for "*earthquake*" not pre-loaded.\n Loading it from mnt/datawave3_new/eq_data directory.")
-        eq_list= readdir("/mnt/datawave3_new")
+        @info("Data for "*earthquake*" not pre-loaded.\n Loading it from loadable data directory.")
+        eq_list= readdir(load_path) 
         if earthquake ∈ eq_list
-            eql= readdir("/mnt/datawave3_new/"*earthquake)
+            eql= readdir(load_path*"/"*earthquake)
             trace_idx= -1
             for i in 1:length(eql)
                 if eql[i][end-1:end]== ".a"
@@ -46,7 +46,7 @@ function obspy_data(earthquake)
 
                 run(`python3 read_obspy_data.py`);
 
-                f= h5open("Bp/utilities/"*earthquake*".h5")
+                f= h5open(dir_path*"/"*earthquake*".h5")
                 cntr= read(f, "center");
                 θ= read(f, "theta")
                 ϕ= read(f, "phi")
@@ -57,25 +57,10 @@ function obspy_data(earthquake)
                 @info(("Utilities for "*earthquake*" loaded and stored for future use."))
             end
         else
-            throw(MyCustomException("The given earthquake "*earthquake*" does not exist in the mnt/datawave3_new/ directory."))
+            throw(MyCustomException("The given earthquake "*earthquake*" does not exist in the data loadable directory."))
             return [];
         end
     end
-#     f= open("earthquake.txt", "w")
-#     write(f, earthquake)
-#     close(f)
-    
-#     f= open("eq_dir.txt", "w")
-#     write(f, earthquake)
-#     close(f)
-    
-#     run(`python3 obspy_data.py`);
-    
-#     f= h5open("Bp/utilities/"*earthquake*".h5")
-#     cntr= read(f, "center");
-#     θ= read(f, "theta")
-#     ϕ= read(f, "phi")
-#     close(f)
     
     return cntr, θ, ϕ, travel_times, network;
 end
@@ -86,20 +71,20 @@ Load the traces for `earthquake`
 Right now, this has been customised for a particular file location. Since loading takes time, the utilities are then stored as HDF5 files at a local location for future use.
 """
 
-function obspy_traces(earthquake)
-    eq_dir= readdir("Bp/processed_traces");
+function obspy_traces(earthquake, dir_path, load_path)
+    eq_dir= readdir(dir_path);
     if earthquake*".h5" ∈ eq_dir
-        f= h5open("Bp/processed_traces/"*earthquake*".h5")
+        f= h5open(dir_path*"/"*earthquake*".h5")
         d_obs= read(f, "traces");
         close(f)
-        @info("Loading the data for "*earthquake*" from the loaded dataset in Bp/processed_traces/ directory.")
+        @info("Loading the data for "*earthquake*" from the loaded dataset in the saved directory.")
         return d_obs
     
     else
-        @info("Data for "*earthquake*" not pre-loaded.\n Loading it from mnt/datawave3_new/eq_data directory.")
-        eq_list= readdir("/mnt/datawave3_new")
+        @info("Data for "*earthquake*" not pre-loaded.\n Loading it from loadable data directory.")
+        eq_list= readdir(load_path)
         if earthquake ∈ eq_list
-            eql= readdir("/mnt/datawave3_new/"*earthquake)
+            eql= readdir(load_path*"/"*earthquake)
             trace_idx= -1
             for i in 1:length(eql)
                 if eql[i][end-1:end]== ".a"
@@ -116,14 +101,14 @@ function obspy_traces(earthquake)
 
                 run(`python3 read_obspy_traces.py`);
 
-                f= h5open("Bp/processed_traces/"*earthquake*".h5")
+                f= h5open(dir_path*"/"*earthquake*".h5")
                 d_obs= read(f, "traces");
                 close(f)
                 @info(("Processed traces for "*earthquake*" loaded and stored for future use."))
                 return d_obs;
             end
         else
-            throw(MyCustomException("The given earthquake "*earthquake*" does not exist in the mnt/datawave3_new/ directory."))
+            throw(MyCustomException("The given earthquake "*earthquake*" does not exist in the loadable data directory."))
             return [];
         end
     end
