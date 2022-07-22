@@ -3,6 +3,7 @@ struct MyCustomException <: Exception
 end
 
 """
+`obspy_data(earthquake, dir_path, load_path)` </br>
 Load the utitlies (center, θ, ϕ, PREM travel times) for `earthquake`
 
 Right now, this has been customised for a particular file location. Since loading takes time, the utilities are then stored as HDF5 files at a local location for future use.
@@ -66,6 +67,7 @@ function obspy_data(earthquake, dir_path, load_path)
 end
 
 """
+`obspy_traces(earthquake, dir_path, load_path)` </br>
 Load the traces for `earthquake`
 
 Right now, this has been customised for a particular file location. Since loading takes time, the utilities are then stored as HDF5 files at a local location for future use.
@@ -117,6 +119,7 @@ end
 # ================================== Filter arrays ===============================================
 
 """
+`filter_arrays(arr, cntr, θ, ϕ, travel_times, network, nr)` </br>
 Filters the data for particular arrays `arr`, and also changes the values of other utilities.
 
 Arguments </br>
@@ -142,6 +145,7 @@ end
 
 
 """
+`get_unique_receivers(cntr, θ, ϕ, travel_times, network, nr)` </br>
 Filters the data so as to get one receiver each from every array, and also changes the values of other utilities.
 
 Arguments </br>
@@ -166,6 +170,7 @@ end
 
 
 """
+`get_unique_receivers_per_bin(cntr, θ, ϕ, travel_times, network, Angles, bins, nr)` </br>
 Filters the data so as to get one receiver each from every azimuthal bin, and also changes the values of other utilities.
 
 Arguments </br>
@@ -215,6 +220,7 @@ end
 
 
 """
+`get_shifts(mgrid, rgrid, v0)` </br>
 Get shifts for all the receivers for all the points using Fraunhofer approximation.
 
 Arguments </br>
@@ -254,6 +260,7 @@ end
 Re= 6371; # radius of earth in km
 
 """
+`cartesian2polar(z,y,x)` </br>
 Converts from [z,y,x] to [θ, ϕ, depth] for `Re`= 6371 km.
 """
 function cartesian2polar(z,y,x) 
@@ -270,6 +277,7 @@ function cartesian2polar(z,y,x)
 end
 
 """
+`polar2cartesian(polar)` </br>
 Converts from [θ, ϕ, depth] to [z,y,x] for `Re`= 6371 km.
 """
 function polar2cartesian(polar)

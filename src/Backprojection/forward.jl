@@ -1,5 +1,4 @@
 # Parallel Stencils
-
 @parallel_indices (it, ir, iT) function G_kernel!(dd, mm, ddelay, rrick0, lb)
     dd[it, ir, iT] += rrick0[it+lb-400- ddelay[ir, iT]]* mm[iT];
     return
@@ -8,6 +7,10 @@ end
 mvec= zeros(Float, 1, 1, nz, ny, nx, nT) |>xpu;
 dvec= zeros(Float, nt, nr, 1, 1, 1, nT) |>xpu;
 
+"""
+`G_ps!(d, m, delay, nt, nr, nz, ny, nx, nT, rick0, mvec, dvec, lb)` </br>
+Forward model function. Updates `d` with G`m`. Other variables passed are for performance.
+"""
 function G_ps!(d, m, delay, nt, nr, nz, ny, nx, nT, rick0, mvec, dvec, lb)
     fill!(dvec, Float(0));
     copyto!(mvec, m);
@@ -30,6 +33,10 @@ g2= zeros(Float, nt, nr, nT) |>xpu;
 grvec= zeros(Float, 1, 1, nz, ny, nx, nT) |>xpu;
 ddvec= zeros(Float, nt, nr, 1, 1, 1, 1) |>xpu;
 
+"""
+`Gt_ps!(grad, ∇d, delay, nt, nr, nz, ny, nx, nT, rick0, g2, grvec, ddvec, lb)` </br>
+Updates `grad` with ``G^T`` `m`. Other variables passed are for performance.
+"""
 function Gt_ps!(grad, ∇d, delay, nt, nr, nz, ny, nx, nT, rick0, g2, grvec, ddvec, lb)
     fill!(grvec, Float(0.));
     copyto!(ddvec, ∇d);
