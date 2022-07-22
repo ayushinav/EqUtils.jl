@@ -2,15 +2,14 @@ struct MyCustomException <: Exception
     var::String
 end
 
-"""
-`obspy_data(earthquake, dir_path, load_path)` </br>
+"""`obspy_data(earthquake, dir_path, load_path)` </br>
 Load the utitlies (center, θ, ϕ, PREM travel times) for `earthquake`
 
-Right now, this has been customised for a particular file location. Since loading takes time, the utilities are then stored as HDF5 files at a local location for future use.
+Since loading takes time, the utilities are then stored as HDF5 files at a local location `dir_path` for future use. If the data is being loaded for the first time, the path of the earthquake data
+`load_path` should be provided.
 
 Returns center, θ, ϕ, PREM travel times, and network IDs for all the receivers. </br>
-Note: θ, ϕ, and PREM travel times are with respect to the center
-"""
+Note: θ, ϕ, and PREM travel times are with respect to the center"""
 function obspy_data(earthquake, dir_path, load_path)
     eq_dir= readdir(dir_path);
     if earthquake*".h5" ∈ eq_dir
@@ -66,12 +65,11 @@ function obspy_data(earthquake, dir_path, load_path)
     return cntr, θ, ϕ, travel_times, network;
 end
 
-"""
-`obspy_traces(earthquake, dir_path, load_path)` </br>
+"""`obspy_traces(earthquake, dir_path, load_path)` </br>
 Load the traces for `earthquake`
 
-Right now, this has been customised for a particular file location. Since loading takes time, the utilities are then stored as HDF5 files at a local location for future use.
-"""
+Since loading takes time, the utilities are then stored as HDF5 files at a local location `dir_path` for future use. If the data is being loaded for the first time, the path of the earthquake data
+`load_path` should be provided."""
 
 function obspy_traces(earthquake, dir_path, load_path)
     eq_dir= readdir(dir_path);
@@ -118,8 +116,7 @@ end
 
 # ================================== Filter arrays ===============================================
 
-"""
-`filter_arrays(arr, cntr, θ, ϕ, travel_times, network, nr)` </br>
+"""`filter_arrays(arr, cntr, θ, ϕ, travel_times, network, nr)` </br>
 Filters the data for particular arrays `arr`, and also changes the values of other utilities.
 
 Arguments </br>
@@ -130,8 +127,7 @@ Arguments </br>
 
 
 Returns `cntr`, updated `θ`, updated `ϕ`, updated `travel_times`, updated list of `network`s, new number of receivers, `IDs` </br>
-`IDs`= indices required to filter the same data from observed data later
-"""
+`IDs`= indices required to filter the same data from observed data later"""
 function filter_arrays(arr, cntr, θ, ϕ, travel_times, network, nr)
     IDs= [];
     for i in 1:length(arr)
@@ -144,8 +140,7 @@ function filter_arrays(arr, cntr, θ, ϕ, travel_times, network, nr)
 end
 
 
-"""
-`get_unique_receivers(cntr, θ, ϕ, travel_times, network, nr)` </br>
+"""`get_unique_receivers(cntr, θ, ϕ, travel_times, network, nr)` </br>
 Filters the data so as to get one receiver each from every array, and also changes the values of other utilities.
 
 Arguments </br>
@@ -154,8 +149,7 @@ Arguments </br>
 `network`= List of network IDs that will be updated </br>
 
 Returns `cntr`, updated `θ`, updated `ϕ`, updated `travel_times`, updated list of `network`s, new number of receivers, `IDs` </br>
-`IDs`= indices required to filter the same data from observed data later
-"""
+`IDs`= indices required to filter the same data from observed data later"""
 function get_unique_receivers(cntr, θ, ϕ, travel_times, network, nr)
     IDs= [];
     for i in unique(network)
@@ -169,8 +163,7 @@ function get_unique_receivers(cntr, θ, ϕ, travel_times, network, nr)
 end
 
 
-"""
-`get_unique_receivers_per_bin(cntr, θ, ϕ, travel_times, network, Angles, bins, nr)` </br>
+"""`get_unique_receivers_per_bin(cntr, θ, ϕ, travel_times, network, Angles, bins, nr)` </br>
 Filters the data so as to get one receiver each from every azimuthal bin, and also changes the values of other utilities.
 
 Arguments </br>
@@ -196,8 +189,7 @@ for i in 1:nr
     end
     Angles[i]= angle;
 end
-```
-"""
+```"""
 function get_unique_receivers_per_bin(cntr, θ, ϕ, travel_times, network, Angles, bins, nr)
     IDs= [];
     bin_ids= zeros(nr)
@@ -219,8 +211,7 @@ end
 # =================================== Shift array ============================================
 
 
-"""
-`get_shifts(mgrid, rgrid, v0)` </br>
+"""`get_shifts(mgrid, rgrid, v0)` </br>
 Get shifts for all the receivers for all the points using Fraunhofer approximation.
 
 Arguments </br>
@@ -228,8 +219,7 @@ Arguments </br>
 `rgrid`= Bundle of [`θ`, `ϕ`] </br>
 `v0`= Velocity around the source grid **(Would be an important hyperparameter)**
 
-Returns `shift` matrix of size (nz, ny, nx, nr)
-"""
+Returns `shift` matrix of size (nz, ny, nx, nr)"""
 function get_shifts(mgrid, rgrid, v0)
     zgrid, ygrid, xgrid, _= mgrid;
     θ, ϕ= rgrid;
@@ -259,10 +249,8 @@ end
 
 Re= 6371; # radius of earth in km
 
-"""
-`cartesian2polar(z,y,x)` </br>
-Converts from [z,y,x] to [θ, ϕ, depth] for `Re`= 6371 km.
-"""
+"""`cartesian2polar(z,y,x)` </br>
+Converts from [z,y,x] to [θ, ϕ, depth] for `Re`= 6371 km."""
 function cartesian2polar(z,y,x) 
     r= sqrt(x*x+y*y+z*z)
     lat= 180/π * asin(z/r)
@@ -276,10 +264,8 @@ function cartesian2polar(z,y,x)
     return lat, long, dep
 end
 
-"""
-`polar2cartesian(polar)` </br>
-Converts from [θ, ϕ, depth] to [z,y,x] for `Re`= 6371 km.
-"""
+"""`polar2cartesian(polar)` </br>
+Converts from [θ, ϕ, depth] to [z,y,x] for `Re`= 6371 km."""
 function polar2cartesian(polar)
     θ, ϕ, dep= polar;
     r= Re- dep

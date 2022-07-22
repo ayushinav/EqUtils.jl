@@ -1,9 +1,7 @@
 
-"""
-`loss_L2!(m, d, dobs, nr)` </br>
+"""`loss_L2!(m, d, dobs, nr)` </br>
 Returns ``||d- d_{obs}||^2``
-where `d` will be updated inside the function as `d`= G`m`
-"""
+where `d` will be updated inside the function as `d`= G`m`"""
 function loss_L2!(m, d, dobs, nr)
     G!(d, m);
     for i in 1: nr rmul!(view(d,:,i), inv(0.001+std(view(d,:,i)))) end
@@ -11,11 +9,9 @@ function loss_L2!(m, d, dobs, nr)
     return J
 end
 
-"""
-`gradient_L2!(grad, m, d, dobs, N)` </br>
-Returns gradient of ``||d- d_{obs}||^2``
-where `d` will be updated inside the function as `d`= G`m`, `N`= `nz`*`ny`*`nx`*`nT`
-"""
+"""`gradient_L2!(grad, m, d, dobs, N)` </br>
+Returns the gradient of ``||d- d_{obs}||^2``
+where `d` will be updated inside the function as `d`= G`m`, `N`= `nz`*`ny`*`nx`*`nT`"""
 function gradient_L2!(grad, m, d, dobs, N)
     G!(d, m);
     for i in 1: nr rmul!(view(d,:,i), inv(0.001+std(view(d,:,i)))) end
@@ -26,6 +22,7 @@ function gradient_L2!(grad, m, d, dobs, N)
 end
 
 # =========================== Frequency domain functions ==========================
+
 function func(x, ŷ, nt, nr)
     Re= view(x, 1:nt*nr)
     Im= view(x, nt*nr+1:2*nt*nr)
@@ -42,16 +39,22 @@ end
 A(x)= func(x, abs.(fobs[:]), nt, nr);
 dA(x)= Flux.gradient(A, x)[1];
 
-function lossf_L2!(m, d, dobs, nr)
+"""`lossf_L2!(m, d, nr, H)` </br>
+Returns ``|| |H*d|- |H*d_{obs}| ||^2``
+where `d` will be updated inside the function as `d`= `H`G`m` and `H` is the Fourier matrix."""
+function lossf_L2!(m, d, nr, H)
     G!(d, m);
-    for i in 1: nr rmul!(view(d,:,i), inv(0.01+std(view(d,:,i)))) end
+    for i in 1: nr rmul!(view(d,:,i), inv(0.001+std(view(d,:,i)))) end
     d_f= H*d;
     x= cat(real.(dfc[:]), imag.(dfc[:]), dims= 1);
     J= A(x);
     return J
 end
 
-function gradientf_L2!(grad, m, d, dobs, N)
+"""`lossf_L2!(m, d, nr, H)` </br>
+Returns the gradient of ``|| |H*d|- |H*d_{obs}| ||^2``
+where `d` will be updated inside the function as `d`= `H`G`m` and `H` is the Fourier matrix."""
+function gradientf_L2!(grad, m, d, N)
     G!(d, m);
     for i in 1: nr rmul!(view(d,:,i), inv(0.001+std(view(d,:,i)))) end
     dfc= H*dc;
