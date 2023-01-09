@@ -26,3 +26,16 @@ function shifted_wavelet(wv::AbstractArray{Float}, tgrid, del_t::Real)
     end
     return sh_wv;
 end
+
+"Returns the wavelet contained in the csv data contained in a path (temporary function, needs to be  )"
+function path_wav(t)
+    if abs(t)>200 return 0
+    else
+        path_data= readdlm("data_synth_muted.csv", ',');
+        path_data= path_data[2:end, 1];
+        return path_data[Int(round(2t+ 401))]
+    end
+end
+
+"Delta function"
+delta(t)= if t==0. 1. else 0. end;
