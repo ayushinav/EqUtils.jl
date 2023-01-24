@@ -222,13 +222,14 @@ end
 
 
 function filter_nevids(eq, θ, ϕ, travel_times, network, ids, nr, nevids)
-    bad_nevids= Dict([("fij1", [27]),
-        ("hnd1", [17,28,29]),
-        ("okt5", [7,14]),
-        ("bon1", [47,70]),
-        ("rat", [16,17,22]),
-        ("okt1", [7,14,15,18,19,32]),
-        ("nbl", [8,15])
+    bad_nevids= Dict([("fij1", [27,50,51,53,55]),
+        ("hnd1", [17]),
+        ("okt5", [5,14,25]),
+        ("bon1", [47,70,10,17,18,20,27,70]),
+        ("rat", [16,7,17]),
+        ("okt1", [7,18,32]),
+        ("okt3", [11,22,23,38,50]),
+        ("fiji3",[32,34,35,36])
         ]);
     
     # bad_nevids= Dict()
@@ -245,7 +246,7 @@ function filter_nevids(eq, θ, ϕ, travel_times, network, ids, nr, nevids)
     IDs= [];
     if eq in keys(bad_nevids)
         append!(bad_nevids[eq], [1,2,3])
-        append!(IDs, (1:nr)[[!(nevids[ir] in parse.(Int32, bad_nevids[eq])) for ir in 1:nr]]);
+        append!(IDs, (1:nr)[[!(nevids[ir] in bad_nevids[eq]) for ir in 1:nr]]);
     else
         append!(IDs, (1:nr)[[!(nevids[ir] in [1,2,3]) for ir in 1:nr]]);
     end
@@ -314,9 +315,11 @@ function get_shifts(mgrid, rgrid, v0, d0)
     for i in 1:nr
         δt0[:,:,:,i]= δt0[:,:,:,i];
     end
-
-    δt0.= δt0.- t0;
-    shift= Int.(round.((δt0./dt)));
+    δt0= xpu(δt0);
+    broadcast!(-, δt0, δt0, t0);
+    # δt0.= δt0.- t0;
+    shift= broadcast(Int, broadcast(round, broadcast(/, δt0, dt)));
+    # shift= Int.(round.((δt0./dt))) |>xpu;
     return shift;
 end
 

@@ -83,3 +83,16 @@ function backproject!(G!, Gt!, img, dobs, filt, dfilt, λ, mvec, dg, algo, itr)
     copyto!(img, opt.minimizer);
     return;
 end
+
+function backproject!(G!, Gt!, img, dobs, λ, mvec, m2, dg, algo, itr)
+    Gt!(img, dobs);
+    if itr==0 return end
+    # fill!(mvec, 0.);
+
+    J(m)= loss_L1!(m, dg, dobs, λ, nr, G!);
+    g!(grad, m)= gradient_L1!(grad, m, m2, dg, dobs, λ, nz*ny*nx*nT, G!, Gt!);
+    
+    opt= optimize(J, g!, mvec[:], algo, Optim.Options(iterations= itr, show_trace= false))
+    copyto!(img, opt.minimizer);
+    return;
+end

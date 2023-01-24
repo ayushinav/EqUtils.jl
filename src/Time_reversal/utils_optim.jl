@@ -46,6 +46,33 @@ function gradient_L2!(grad, m, d, dobs, λ, N)
     broadcast!(+, grad, grad, broadcast(*, 2λ*inv(length(m[:])), m))
 end
 
+# ============================== constrained LSS with L1 norm ======================================
+
+"""`loss_L2!(m, d, dobs, nr)` </br>
+Returns ``||d- d_{obs}||^2``
+where `d` will be updated inside the function as `d`= G`m`"""
+function loss_L1!(m, d, dobs, λ, nr, G!)
+    broadcast!(relu, m, m);
+    G!(d, m);
+    J= Flux.mse(reshape(d, :), reshape(dobs, :))+ λ*inv(length(m))* Flux.norm(m, 1);
+    # J= inv(size(m))*norm(m)+ inv(size(d[:]))*Flux.mse(d, dobs);
+    return J
+end
+
+"""`gradient_L2!(grad, m, d, dobs, N)` </br>
+Returns the gradient of ``||d- d_{obs}||^2``
+where `d` will be updated inside the function as `d`= G`m`, `N`= `nz`*`ny`*`nx`*`nT`"""
+function gradient_L1!(grad, m, m2, d, dobs, λ, N, G!, Gt!)
+    G!(d, m);
+    broadcast!(relu, m, m);
+    
+    broadcast!(-, d, d, dobs);  
+    Gt!(grad, d);
+    rmul!(grad, inv(length(dobs)));
+    rmul!(m2, λ*inv(length(m2)));
+    broadcast!(+, grad, grad, m2);
+end
+
 # =========================== filtered x =========================================
 
 """`loss_L2!(m, d, dobs, nr)` </br>
